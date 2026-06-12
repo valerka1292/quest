@@ -94,7 +94,7 @@ nano server/.env
 DATABASE_URL="postgresql://postgres:postgres@postgres:5432/veilworlds?schema=public"
 PORT=3001
 HOST=0.0.0.0
-CORS_ORIGIN=https://твой-домен.com
+CORS_ORIGIN=https://veilworlds.quest
 JWT_SECRET=<придумай_случайную_длинную_строку>
 JWT_REFRESH_SECRET=<другую_случайную_длинную_строку>
 REDIS_URL=redis://redis:6379
@@ -102,7 +102,7 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=
 SMTP_PASS=
-SMTP_FROM=booking@veilworlds.com
+SMTP_FROM=booking@veilworlds.quest
 TELEGRAM_BOT_TOKEN=<если_нужно>
 TELEGRAM_CHAT_ID=<если_нужно>
 ```
@@ -117,7 +117,7 @@ JWT секреты придумай сам (например, `openssl rand -hex
 nano nginx/nginx.conf
 ```
 
-Замени `veilworlds.com` и `www.veilworlds.com` на свой домен.
+Замени `veilworlds.quest` и `www.veilworlds.quest` на свой домен.
 
 ## 9. Запуск
 
@@ -160,12 +160,12 @@ sudo apt install certbot -y
 docker compose stop nginx
 
 # Получить сертификат
-sudo certbot certonly --standalone -d твой-домен.com -d www.твой-домен.com
+sudo certbot certonly --standalone -d veilworlds.quest -d www.veilworlds.quest
 
-# Сертификаты будут в /etc/letsencrypt/live/твой-домен.com/
+# Сертификаты будут в /etc/letsencrypt/live/veilworlds.quest/
 # Проверь что nginx.conf смотрит на правильный путь
-# ssl_certificate /etc/letsencrypt/live/твой-домен.com/fullchain.pem;
-# ssl_certificate_key /etc/letsencrypt/live/твой-домен.com/privkey.pem;
+# ssl_certificate /etc/letsencrypt/live/veilworlds.quest/fullchain.pem;
+# ssl_certificate_key /etc/letsencrypt/live/veilworlds.quest/privkey.pem;
 
 # Запустить nginx обратно
 docker compose start nginx
@@ -205,4 +205,4 @@ docker compose exec server npx prisma migrate dev
 - Статика (фронтенд) собирается заранее и лежит в `apps/web/dist` / `apps/admin/dist`, nginx раздаёт её напрямую
 - Все запросы к `/api/` nginx проксирует на сервер (`http://server:3001`)
 
-Готово. После этих шагов сайт будет доступен по `https://твой-домен.com`.
+Готово. После этих шагов сайт будет доступен по `https://veilworlds.quest`.
