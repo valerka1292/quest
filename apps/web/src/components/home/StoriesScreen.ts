@@ -223,6 +223,22 @@ export class StoriesScreen extends HTMLElement {
   }
 
   // --- Slide Builders ---
+  private getNextTime(): string {
+    const TIMES = ['10:00', '11:30', '13:00', '14:30', '16:00', '17:30', '19:00', '20:30'];
+    const formatter = new Intl.DateTimeFormat('uk-UA', {
+      timeZone: 'Europe/Kyiv', hour: '2-digit', minute: '2-digit', hour12: false,
+    });
+    const [h, m] = formatter.format(new Date()).split(':').map(Number);
+    const currentMinutes = h * 60 + m;
+    for (const time of TIMES) {
+      const [th, tm] = time.split(':').map(Number);
+      if (th * 60 + tm > currentMinutes) {
+        return `Сьогодні о ${time}`;
+      }
+    }
+    return `Завтра о ${TIMES[0]}`;
+  }
+
   private makeQuestSlide(quest: Quest, index: number): HTMLDivElement {
     const slide = div({ class: 'flex-shrink-0 w-full h-full flex flex-col p-6 pt-24 pb-10 sm:pb-12 snap-center snap-always relative select-none overflow-y-auto hide-scrollbar' });
 
@@ -237,7 +253,7 @@ export class StoriesScreen extends HTMLElement {
     bgDiv.style.background = `${gradient}, url(${quest.heroImage}) ${position}/cover no-repeat`;
     slide.appendChild(bgDiv);
 
-    const nextTime = index === 0 ? 'Сьогодні о 20:30' : 'Сьогодні о 20:45';
+    const nextTime = this.getNextTime();
 
     const stars = Math.round(quest.rating);
     const rev = this.reviews[quest.slug as keyof typeof this.reviews];
