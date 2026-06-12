@@ -104,7 +104,7 @@ export async function sendUpcomingBookingReminders() {
   const now = new Date();
 
   try {
-    const { prisma } = await import('../../utils/prisma.js');
+    const { prisma } = await import('../utils/prisma.js');
     const bookings = await prisma.booking.findMany({
       where: { status: 'CONFIRMED' },
       include: { quest: true, package: true },
