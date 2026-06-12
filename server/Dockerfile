@@ -1,11 +1,13 @@
 FROM node:20-alpine AS shared-build
 WORKDIR /app
+COPY tsconfig.base.json ./
 COPY packages/shared/package.json packages/shared/tsconfig.json packages/shared/
 COPY packages/shared/src packages/shared/src
 RUN cd packages/shared && npm install && npm run build
 
 FROM node:20-alpine AS server-build
 WORKDIR /app
+COPY tsconfig.base.json ./
 COPY server/package.json server/tsconfig.json server/
 COPY server/prisma server/prisma
 COPY --from=shared-build /app/packages/shared /app/packages/shared
