@@ -17,7 +17,7 @@ RUN npm ci --workspace=server --workspace=packages/shared && \
 COPY server/src server/src
 RUN cd server && npm run build
 
-FROM node:20-alpine AS server
+FROM node:20-bookworm-slim AS server
 WORKDIR /app
 COPY --from=server-build /app/server/dist /app/dist
 COPY --from=server-build /app/server/prisma /app/prisma
