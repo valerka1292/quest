@@ -15,7 +15,7 @@ usermod -aG sudo quest
 
 # Дальше все команды выполняем от quest, а не от root
 su - quest
-cd /opt
+cd ~
 ```
 
 ## 2. Настройка фаервола (UFW)
@@ -55,8 +55,8 @@ docker --version
 ## 4. Клонирование проекта
 
 ```bash
-git clone <ссылка-на-твой-репозиторий> /opt/veilworlds
-cd /opt/veilworlds
+git clone https://github.com/valerka1292/quest.git ~/quest
+cd ~/quest
 ```
 
 ## 5. Установка Node.js (только для сборки фронтенда, в продакшене не нужен)
@@ -150,41 +150,42 @@ docker compose exec server npx tsx prisma/seed.ts
 
 ## 11. SSL-сертификат (HTTPS)
 
-Пока порт 80 занят Nginx, certbot не сможет его использовать. Поэтому сначала временно убираем Nginx и используем standalone-режим.
+Установка certbot и получение сертификата:
 
 ```bash
-# Установка certbot
+# 1. Установить certbot (написан на Python)
 sudo apt install certbot -y
 
-# Остановить nginx (чтоб освободить порты 80/443)
+# 2. Создать папки для файлов certbot
+mkdir -p certbot/www certbot/conf
+
+# 3. Остановить nginx (чтоб освободить порт 80 для certbot)
 docker compose stop nginx
 
-# Получить сертификат
+# 4. Получить сертификат (certbot сам поднимает сервер на 80 порту)
 sudo certbot certonly --standalone -d veilworlds.quest -d www.veilworlds.quest
 
-# Сертификаты будут в /etc/letsencrypt/live/veilworlds.quest/
-# Проверь что nginx.conf смотрит на правильный путь
-# ssl_certificate /etc/letsencrypt/live/veilworlds.quest/fullchain.pem;
-# ssl_certificate_key /etc/letsencrypt/live/veilworlds.quest/privkey.pem;
+# 5. Сертификаты сохранятся в /etc/letsencrypt/live/veilworlds.quest/
+#    nginx.conf уже настроен на этот путь, ничего менять не надо
 
-# Запустить nginx обратно
-docker compose start nginx
+# 6. Запустить всё обратно
+docker compose up -d
 ```
 
-Добавь автообновление сертификата (сертификаты живут 90 дней):
+После этого `http://veilworlds.quest` будет редиректить на `https://veilworlds.quest`.
+
+Автообновление сертификата (живёт 90 дней, обновляется раз в 2 месяца):
 
 ```bash
-# Открой crontab
 sudo crontab -e
-
-# Добавь строку (проверка раз в месяц, Nginx перезагружается сам)
-0 0 1 * * certbot renew --quiet && docker compose -f /opt/veilworlds/docker-compose.yml exec nginx nginx -s reload
+# Добавить строку:
+0 0 1 */2 * certbot renew --quiet && docker compose -f /home/quest/quest/docker-compose.yml exec nginx nginx -s reload
 ```
 
 ## 12. Перезапуск после обновлений
 
 ```bash
-cd /opt/veilworlds
+cd /home/quest/quest
 git pull
 npm install
 npm run build:shared
