@@ -18,6 +18,7 @@ COPY server/src server/src
 RUN cd server && npm run build
 
 FROM node:20-bookworm-slim AS server
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=server-build /app/server/dist /app/dist
 COPY --from=server-build /app/server/prisma /app/prisma
