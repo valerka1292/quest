@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Quest {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  name         String
+  subtitle     String
+  tagline      String
+  description  String        @db.Text
+  plotSummary  String        @db.Text
+  genre        String
+  ageMin       Int
+  duration     Int
+  minPlayers   Int
+  maxPlayers   Int
+  hasActor     Boolean
+  hasRestZone  Boolean
+  accentColor  String
+  heroImage    String
+  photos       String[]
+  rating       Float         @default(0)
+  reviewCount  Int           @default(0)
+  isActive     Boolean       @default(true)
+  bookings     Booking[]
+  reviews      Review[]
+  blockedSlots BlockedSlot[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Package {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  description   String   @db.Text
+  basePrice     Int
+  basePlayers   Int
+  pricePerExtra Int
+  maxPlayers    Int
+  durationMin   Int
+  includes      String[]
+  isActive      Boolean  @default(true)
+  bookings      Booking[]
+  createdAt     DateTime @default(now())
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  ticketNumber String        @unique
+  quest        Quest?        @relation(fields: [questId], references: [id])
+  questId      String?
+  package      Package?      @relation(fields: [packageId], references: [id])
+  packageId    String?
+  date         DateTime
+  time         String
+  players      Int
+  price        Int
+  status       BookingStatus @default(PENDING)
+  firstName    String
+  lastName     String
+  phone        String
+  email        String?
+  comment      String?       @db.Text
+  managerNotes String?       @db.Text
+  source       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([questId, date, time], name: "booking_slot_unique")
+  @@index([questId, date, status])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  ARCHIVED
+}
+
+model Review {
+  id        String       @id @default(cuid())
+  quest     Quest        @relation(fields: [questId], references: [id])
+  questId   String
+  author    String
+  rating    Int
+  text      String       @db.Text
+  status    ReviewStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+
+  @@index([questId, status])
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model BlockedSlot {
+  id        String   @id @default(cuid())
+  quest     Quest    @relation(fields: [questId], references: [id])
+  questId   String
+  date      DateTime
+  time      String?
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model Certificate {
+  id           String            @id @default(cuid())
+  code         String            @unique
+  customerName String
+  phone        String
+  email        String?
+  amount       Int
+  status       CertificateStatus @default(PENDING)
+  createdAt    DateTime          @default(now())
+  expiresAt    DateTime
+}
+
+enum CertificateStatus {
+  PENDING
+  ACTIVE
+  USED
+  EXPIRED
+}
+
+model Admin {
+  id            String         @id @default(cuid())
+  username      String         @unique
+  passwordHash  String
+  createdAt     DateTime       @default(now())
+  lastLoginAt   DateTime?
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  admin      Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId    String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([adminId])
+  @@index([tokenHash])
+}

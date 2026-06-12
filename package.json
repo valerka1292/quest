@@ -1,0 +1,33 @@
+{
+  "name": "veilworlds",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "server"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w apps/web",
+    "dev:admin": "npm run dev -w apps/admin",
+    "dev:server": "npm run dev -w server",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\"",
+    "build:shared": "npm run build -w packages/shared",
+    "build:web": "npm run build -w apps/web",
+    "build:admin": "npm run build -w apps/admin",
+    "build:server": "npm run build -w server",
+    "build": "npm run build:shared && npm run build:server && npm run build:web && npm run build:admin",
+    "db:migrate": "npm run db:migrate -w server",
+    "db:push": "npm run db:push -w server",
+    "db:generate": "npm run db:generate -w server",
+    "db:studio": "npm run db:studio -w server",
+    "lint": "eslint . --ext .ts,.tsx",
+    "typecheck": "tsc --build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "opencode-goal-plugin": "^0.1.11"
+  }
+}
