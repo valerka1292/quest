@@ -1,7 +1,7 @@
 import type { TimeSlot } from '@veilworlds/shared';
 
-const SILENT_HILL_TIMES = ['10:00', '11:30', '13:00', '14:30', '16:00', '17:30', '19:00', '20:30'];
-const HARRY_POTTER_TIMES = ['10:00', '11:30', '13:00', '14:30', '16:00', '17:30', '19:00', '20:30'];
+const SILENT_HILL_TIMES = ['10:30', '12:00', '13:30', '15:00', '16:30', '18:00', '19:30', '21:00'];
+const HARRY_POTTER_TIMES = ['10:30', '12:00', '13:30', '15:00', '16:30', '18:00', '19:30', '21:00'];
 
 export function getTimesForQuest(questSlug: string): string[] {
   return questSlug === 'silent-hill' ? SILENT_HILL_TIMES : HARRY_POTTER_TIMES;
