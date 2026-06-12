@@ -24,5 +24,6 @@ COPY --from=server-build /app/server/prisma /app/prisma
 COPY --from=server-build /app/server/package.json /app/package.json
 COPY --from=server-build /app/node_modules /app/node_modules
 COPY --from=server-build /app/node_modules/.prisma /app/node_modules/.prisma
+COPY --from=server-build /app/packages /app/packages
 EXPOSE 3001
 CMD ["node", "dist/app.js"]
