@@ -223,8 +223,10 @@ export class StoriesScreen extends HTMLElement {
   }
 
   // --- Slide Builders ---
-  private getNextTime(): string {
-    const TIMES = ['10:30', '12:00', '13:30', '15:00', '16:30', '18:00', '19:30', '21:00'];
+  private getNextTime(slug: string): string {
+    const TIMES = slug === 'silent-hill'
+      ? ['10:30', '12:00', '13:30', '15:00', '16:30', '18:00', '19:30', '21:00']
+      : ['10:45', '12:15', '13:45', '15:15', '16:45', '18:15', '19:45', '21:15'];
     const formatter = new Intl.DateTimeFormat('uk-UA', {
       timeZone: 'Europe/Kyiv', hour: '2-digit', minute: '2-digit', hour12: false,
     });
@@ -253,7 +255,7 @@ export class StoriesScreen extends HTMLElement {
     bgDiv.style.background = `${gradient}, url(${quest.heroImage}) ${position}/cover no-repeat`;
     slide.appendChild(bgDiv);
 
-    const nextTime = this.getNextTime();
+    const nextTime = this.getNextTime(quest.slug);
 
     const stars = Math.round(quest.rating);
     const rev = this.reviews[quest.slug as keyof typeof this.reviews];
