@@ -25,5 +25,7 @@ COPY --from=server-build /app/server/package.json /app/package.json
 COPY --from=server-build /app/node_modules /app/node_modules
 COPY --from=server-build /app/node_modules/.prisma /app/node_modules/.prisma
 COPY --from=server-build /app/packages /app/packages
+COPY server/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 EXPOSE 3001
-CMD ["node", "dist/app.js"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
