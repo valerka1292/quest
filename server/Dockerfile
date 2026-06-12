@@ -6,6 +6,7 @@ COPY packages/shared/src packages/shared/src
 RUN cd packages/shared && npm install && npm run build
 
 FROM node:20-bookworm-slim AS server-build
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY tsconfig.base.json ./
 COPY server/package.json server/tsconfig.json server/
