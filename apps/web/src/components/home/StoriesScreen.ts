@@ -237,7 +237,7 @@ export class StoriesScreen extends HTMLElement {
     bgDiv.style.background = `${gradient}, url(${quest.heroImage}) ${position}/cover no-repeat`;
     slide.appendChild(bgDiv);
 
-    const nextTime = index === 0 ? 'Сьогодні о 19:15' : 'Сьогодні о 19:30';
+    const nextTime = index === 0 ? 'Сьогодні о 20:30' : 'Сьогодні о 20:45';
 
     const stars = Math.round(quest.rating);
     const rev = this.reviews[quest.slug as keyof typeof this.reviews];
