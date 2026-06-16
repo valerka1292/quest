@@ -2,7 +2,7 @@ import { el, a } from '../../utils/dom.js';
 
 export class Nav extends HTMLElement {
   connectedCallback() {
-    this.className = 'fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/[0.05] transition-all duration-300';
+    this.className = 'fixed top-0 left-0 right-0 z-50 bg-bg-base/70 backdrop-blur-md border-b border-white/[0.05] transition-all duration-300';
     this.innerHTML = `
       <div class="max-w-6xl mx-auto px-6 md:px-8 h-16 flex items-center justify-between">
         <a href="/" data-link="/" class="text-lg font-black tracking-wide text-white hover:opacity-90 transition-opacity">
@@ -40,7 +40,7 @@ export class Nav extends HTMLElement {
             <i class="ph ph-skull text-accent-red text-lg"></i> Silent Hill
           </a>
           <a href="/harry-potter" data-link="/harry-potter" class="flex items-center gap-3 hover:text-white py-2 px-3 rounded-xl hover:bg-white/[0.03] transition-all">
-            <i class="ph ph-wand text-accent-amber text-lg"></i> Гаррі Поттер
+            <i class="ph ph-magic-wand text-accent-amber text-lg"></i> Гаррі Поттер
           </a>
           <a href="/certificate" data-link="/certificate" class="flex items-center gap-3 hover:text-white py-2 px-3 rounded-xl hover:bg-white/[0.03] transition-all">
             <i class="ph ph-gift text-accent-purple text-lg"></i> Сертифікати
@@ -73,9 +73,9 @@ export class Nav extends HTMLElement {
     // Dynamic styles on scroll
     window.addEventListener('scroll', () => {
       if (window.scrollY > 50) {
-        this.className = 'fixed top-0 left-0 right-0 z-50 bg-bg-base/90 border-b border-border-subtle shadow-lg transition-all duration-300';
+        this.className = 'fixed top-0 left-0 right-0 z-50 bg-bg-base/95 border-b border-border-subtle shadow-lg transition-all duration-300';
       } else {
-        this.className = 'fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/[0.05] transition-all duration-300';
+        this.className = 'fixed top-0 left-0 right-0 z-50 bg-bg-base/70 backdrop-blur-md border-b border-white/[0.05] transition-all duration-300';
       }
     });
   }
