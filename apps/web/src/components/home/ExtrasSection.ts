@@ -14,7 +14,7 @@ export class ExtrasSection extends HTMLElement {
     zone.innerHTML = `
       <h3 class="text-xl font-bold mb-2">Зона відпочинку</h3>
       <p class="text-text-secondary text-sm mb-4">Окрема кімната для святкування після квесту. Місткість до 12 осіб. Почасова оплата.</p>
-      <p class="text-text-muted text-xs mb-4">* Деталі та ціна — при дзвінку менеджера</p>
+      <p class="text-text-muted text-xs mb-4">* Деталі та ціна — при дзвінку менеджеру</p>
       <a href="tel:+380999773349" class="inline-block text-sm font-semibold px-5 py-2.5 rounded-full border border-white/10 hover:bg-white/5 transition-colors">Зателефонувати</a>
     `;
 

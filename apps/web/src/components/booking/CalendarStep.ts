@@ -30,7 +30,7 @@ export class CalendarStep extends HTMLElement {
     if (this.props.packageSlug) {
       this.innerHTML = `
         <h2 class="text-xl font-bold mb-1">Оберіть дату</h2>
-        <p class="text-text-secondary text-sm mb-4">Час і тривалість обговорюються при дзвінку менеджера.</p>
+        <p class="text-text-secondary text-sm mb-4">Час і тривалість обговорюються при дзвінку менеджеру.</p>
       `;
       this.appendChild(this.buildCalendar());
       const continueContainer = div({ id: 'continue-container', class: 'mt-6' });

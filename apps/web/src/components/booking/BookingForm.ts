@@ -160,7 +160,7 @@ export class BookingForm extends HTMLElement {
       const actorGrp = div({ class: 'flex items-center gap-3 bg-white/[0.02] border border-white/[0.06] rounded-xl p-4' });
       actorGrp.innerHTML = `
         <input type="checkbox" id="with-actor" class="w-5 h-5 accent-accent-amber cursor-pointer">
-        <label for="with-actor" class="text-sm text-text-secondary cursor-pointer select-none">З актором (+500 грн, рекомендовано для дітей до 12 р.)</label>
+        <label for="with-actor" class="text-sm text-text-secondary cursor-pointer select-none">З актором (+500 грн, також рекомендовано для дітей до 12 р.)</label>
       `;
       actorGrp.querySelector('input')!.addEventListener('change', (e) => {
         this.withActor = (e.target as HTMLInputElement).checked;
