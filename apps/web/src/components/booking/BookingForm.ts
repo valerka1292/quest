@@ -84,13 +84,14 @@ export class BookingForm extends HTMLElement {
     for (const f of fields) {
       const grp = div({ class: 'flex flex-col gap-1.5' });
       grp.innerHTML = `<label class="text-sm font-medium text-text-secondary">${f.label}</label>`;
-      const inp = el('input', {
+      const attrs: Record<string, string> = {
         type: f.type, name: f.name,
-        required: f.required ? 'true' : 'false',
         autocomplete: f.autocomplete,
         class: 'bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-text-muted focus:outline-none transition-colors w-full',
         placeholder: f.label,
-      }) as HTMLInputElement;
+      };
+      if (f.required) attrs.required = 'true';
+      const inp = el('input', attrs) as HTMLInputElement;
 
       // Realtime validation visual states
       inp.addEventListener('blur', () => {
