@@ -41,7 +41,7 @@ export const staticQuests: Quest[] = [
     plotSummary: 'Ви отримали лист із Гоґвортсу! Але щоб стати справжніми чарівниками, потрібно пройти випробування.',
     genre: 'Фентезі',
     ageMin: 8,
-    duration: 90,
+    duration: 60,
     minPlayers: 2,
     maxPlayers: 6,
     hasActor: false,
