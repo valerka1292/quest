@@ -229,10 +229,13 @@ export class CalendarStep extends HTMLElement {
       `;
 
       if (slot.available) {
+        btn.dataset.available = 'true';
         btn.addEventListener('click', () => {
           this.selectedTime = slot.time;
           grid.querySelectorAll('button').forEach(b => {
-            b.className = `py-3 px-2 rounded-xl text-sm font-medium transition-all duration-300 bg-white/[0.03] border border-white/10 ${borderAccent} text-white`;
+            if (b.dataset.available) {
+              b.className = `py-3 px-2 rounded-xl text-sm font-medium transition-all duration-300 bg-white/[0.03] border border-white/10 ${borderAccent} text-white`;
+            }
           });
           btn.className = `py-3 px-2 rounded-xl text-sm font-medium transition-all duration-300 ${activeColorClass} text-white`;
           
