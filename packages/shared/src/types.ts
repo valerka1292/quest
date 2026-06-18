@@ -77,14 +77,6 @@ export interface Review {
   createdAt: string;
 }
 
-export interface BlockedSlot {
-  id: string;
-  questId: string;
-  date: string;
-  time: string | null;
-  reason: string | null;
-}
-
 export type CertificateStatus = 'PENDING' | 'ACTIVE' | 'USED' | 'EXPIRED';
 
 export interface Certificate {
@@ -122,36 +114,4 @@ export interface ApiError {
   };
 }
 
-export interface PaginatedResponse<T> {
-  success: true;
-  data: T[];
-  meta: {
-    total: number;
-    page: number;
-    perPage: number;
-  };
-}
-
 export type ApiResult<T> = ApiResponse<T> | ApiError;
-
-export interface StatsOverview {
-  todayBookings: number;
-  monthRevenue: number;
-  popularQuest: string;
-  totalBookings: number;
-  confirmedBookings: number;
-  cancelledBookings: number;
-}
-
-export interface RevenueStats {
-  date: string;
-  revenue: number;
-  questId: string;
-  questName: string;
-}
-
-export interface FunnelStats {
-  step: string;
-  count: number;
-  dropOff: number;
-}

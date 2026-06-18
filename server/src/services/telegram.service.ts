@@ -46,29 +46,19 @@ export async function sendNewBookingNotification(booking: any) {
     `📅 <b>Дата:</b> ${escapeHtml(dateStr)}`,
     `⏰ <b>Час:</b> ${escapeHtml(booking.time)}`,
     `👥 <b>Гравців:</b> ${booking.players}`,
-    `💰 <b>Сума:</b> ${booking.price.toLocaleString()} грн`,
-    '',
-    `👤 <b>Клієнт:</b> ${escapeHtml(booking.firstName)} ${escapeHtml(booking.lastName)}`,
-    `📞 ${escapeHtml(cleanPhone(booking.phone))}`,
-    booking.email ? `📧 ${escapeHtml(booking.email)}` : '',
-    '',
-    booking.comment ? `💬 <i>${escapeHtml(booking.comment)}</i>` : '',
-  ].filter(Boolean).join('\n');
-
-  const inlineKeyboard = {
-    inline_keyboard: [
-      [
-        { text: '✅ Підтвердити', callback_data: `confirm:${booking.id}` },
-        { text: '❌ Скасувати', callback_data: `cancel:${booking.id}` },
-      ],
-    ],
-  };
+      `💰 <b>Сума:</b> ${booking.price.toLocaleString()} грн`,
+      '',
+      `👤 <b>Клієнт:</b> ${escapeHtml(booking.firstName)} ${escapeHtml(booking.lastName)}`,
+      `📞 ${escapeHtml(cleanPhone(booking.phone))}`,
+      booking.email ? `📧 ${escapeHtml(booking.email)}` : '',
+      '',
+      booking.comment ? `💬 <i>${escapeHtml(booking.comment)}</i>` : '',
+      '',
+      '🔄 Зареєстровано в зовнішній системі',
+    ].filter(Boolean).join('\n');
 
   try {
-    await b.sendMessage(config.telegram.chatId, message, {
-      parse_mode: 'HTML',
-      reply_markup: inlineKeyboard,
-    });
+    await b.sendMessage(config.telegram.chatId, message, { parse_mode: 'HTML' });
   } catch (err) {
     console.error('Telegram notification failed:', err);
   }
@@ -172,22 +162,4 @@ export function startReminderCron() {
   console.log('⏰ Telegram reminder cron started (every minute)');
 }
 
-export async function setupTelegramCallbacks(onConfirm: (id: string) => Promise<void>, onCancel: (id: string) => Promise<void>) {
-  const b = await getBot();
-  if (!b) return;
 
-  b.on('callback_query', async (query: any) => {
-    const [action, id] = query.data.split(':');
-    try {
-      if (action === 'confirm') {
-        await onConfirm(id);
-        b.answerCallbackQuery(query.id, { text: '✅ Заявку підтверджено!' });
-      } else if (action === 'cancel') {
-        await onCancel(id);
-        b.answerCallbackQuery(query.id, { text: '❌ Заявку скасовано!' });
-      }
-    } catch (err) {
-      b.answerCallbackQuery(query.id, { text: 'Помилка' });
-    }
-  });
-}

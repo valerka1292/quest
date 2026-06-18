@@ -1,6 +1,5 @@
 import { prisma } from '../utils/prisma.js';
 import type { BookingInput } from '@veilworlds/shared';
-import { calcQuestPrice, calcPackagePrice } from '../utils/priceCalc.js';
 import crypto from 'node:crypto';
 
 function generateTicketNumber(): string {
@@ -17,55 +16,40 @@ export function parseLocalDate(dateStr: string): Date {
   return new Date(dateStr);
 }
 
-export async function createBooking(input: BookingInput) {
+export async function createBooking(input: BookingInput, externalPrice?: number | null) {
   const ticketNumber = generateTicketNumber();
   const targetDate = parseLocalDate(input.date);
 
-  // Compute price server-side — never trust client-supplied price.
   let price: number;
-  if (input.questId) {
+  if (externalPrice != null) {
+    price = externalPrice;
+  } else if (input.questId) {
     const quest = await prisma.quest.findUnique({ where: { id: input.questId } });
     if (!quest) throw new Error('QUEST_NOT_FOUND');
     if (input.players < quest.minPlayers || input.players > quest.maxPlayers) {
       throw new Error(`PLAYER_LIMIT:Кількість гравців має бути від ${quest.minPlayers} до ${quest.maxPlayers}`);
     }
-    price = calcQuestPrice({
-      questSlug: quest.slug as 'silent-hill' | 'harry-potter',
-      players: input.players,
-      time: input.time,
-      withActor: input.withActor ?? false,
-    });
+    const [h] = input.time.split(':').map(Number);
+    const isEvening = h >= 19;
+    price = 2500;
+    if (input.players > 4) price += (input.players - 4) * 400;
+    if (isEvening) price += 500;
   } else if (input.packageId) {
     const pkg = await prisma.package.findUnique({ where: { id: input.packageId } });
     if (!pkg) throw new Error('PACKAGE_NOT_FOUND');
     if (input.players < 1 || input.players > pkg.maxPlayers) {
       throw new Error(`PLAYER_LIMIT:Кількість гравців має бути від 1 до ${pkg.maxPlayers}`);
     }
-    price = calcPackagePrice({
-      basePrice: pkg.basePrice,
-      basePlayers: pkg.basePlayers,
-      pricePerExtra: pkg.pricePerExtra,
-      players: input.players,
-    });
+    price = pkg.basePrice;
+    if (input.players > pkg.basePlayers) {
+      price += (input.players - pkg.basePlayers) * pkg.pricePerExtra;
+    }
   } else {
     throw new Error('BOOKING_REQUIRES_QUEST_OR_PACKAGE');
   }
 
   try {
     const booking = await prisma.$transaction(async (tx: any) => {
-      if (input.questId && input.time) {
-        const blocked = await tx.blockedSlot.findFirst({
-          where: {
-            questId: input.questId,
-            date: targetDate,
-            OR: [{ time: input.time }, { time: null }],
-          },
-        });
-        if (blocked) {
-          throw new Error('SLOT_BLOCKED');
-        }
-      }
-
       return tx.booking.create({
         data: {
           ticketNumber,
@@ -89,7 +73,6 @@ export async function createBooking(input: BookingInput) {
 
     return booking;
   } catch (err: any) {
-    // P2002 = unique constraint violation → slot already taken
     if (err?.code === 'P2002' || err?.message?.includes('booking_slot_unique')) {
       throw new Error('SLOT_TAKEN');
     }
@@ -166,61 +149,4 @@ export async function updateBookingStatus(id: string, status: string) {
 
 export async function deleteBooking(id: string) {
   return prisma.booking.delete({ where: { id } });
-}
-
-export async function getBookedTimesForDate(questId: string, date: string) {
-  const bookings = await prisma.booking.findMany({
-    where: {
-      questId,
-      date: parseLocalDate(date),
-      status: { notIn: ['CANCELLED', 'ARCHIVED'] },
-    },
-    select: { time: true },
-  });
-  return bookings.map((b: { time: string }) => b.time);
-}
-
-export async function getBookedSlotsForMonth(questId: string, month: string) {
-  const [y, m] = month.split('-').map(Number);
-  const start = new Date(Date.UTC(y, m - 1, 1));
-  const end = new Date(Date.UTC(y, m, 1));
-
-  const bookings = await prisma.booking.findMany({
-    where: {
-      questId,
-      date: { gte: start, lt: end },
-      status: { notIn: ['CANCELLED', 'ARCHIVED'] },
-    },
-    select: { date: true, time: true },
-  });
-
-  const map = new Map<string, string[]>();
-  for (const b of bookings) {
-    const ds = b.date.toISOString().slice(0, 10);
-    if (!map.has(ds)) map.set(ds, []);
-    map.get(ds)!.push(b.time);
-  }
-  return map;
-}
-
-export async function getBlockedSlotsForMonth(questId: string, month: string) {
-  const [y, m] = month.split('-').map(Number);
-  const start = new Date(Date.UTC(y, m - 1, 1));
-  const end = new Date(Date.UTC(y, m, 1));
-
-  const slots = await prisma.blockedSlot.findMany({
-    where: {
-      questId,
-      date: { gte: start, lt: end },
-    },
-    select: { date: true, time: true },
-  });
-
-  const map = new Map<string, string[]>();
-  for (const s of slots) {
-    const ds = s.date.toISOString().slice(0, 10);
-    if (!map.has(ds)) map.set(ds, []);
-    map.get(ds)!.push(s.time || '__full_day__');
-  }
-  return map;
 }

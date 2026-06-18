@@ -8,8 +8,6 @@ export const bookingSchema = z.object({
   date: z.string().min(1, 'Оберіть дату'),
   time: z.string().min(1, 'Оберіть час'),
   players: z.number().int().min(1, 'Мінімум 1 гравець').max(20, 'Максимум 20 гравців'),
-  // NOTE: price is intentionally NOT accepted from the client.
-  // It is always computed server-side from quest/package data.
   withActor: z.boolean().optional().default(false),
   firstName: z.string().min(1, 'Вкажіть імʼя').max(100),
   lastName: z.string().min(1, 'Вкажіть прізвище').max(100),
@@ -39,39 +37,3 @@ export const certificateSchema = z.object({
 });
 
 export type CertificateInput = z.infer<typeof certificateSchema>;
-
-export const adminLoginSchema = z.object({
-  username: z.string().min(1),
-  password: z.string().min(1, 'Введіть пароль'),
-});
-
-export const adminBookingUpdateSchema = z.object({
-  date: z.string().optional(),
-  time: z.string().optional(),
-  players: z.number().int().min(1).optional(),
-  price: z.number().int().positive().optional(),
-  status: z.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED', 'ARCHIVED']).optional(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  phone: z.string().optional(),
-  email: z.string().optional().nullable(),
-  comment: z.string().optional().nullable(),
-  managerNotes: z.string().optional().nullable(),
-});
-
-export const blockedSlotSchema = z.object({
-  questId: z.string().min(1),
-  date: z.string().min(1),
-  time: z.string().nullable().optional(),
-  reason: z.string().optional().nullable(),
-});
-
-export const paginationSchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  perPage: z.coerce.number().int().min(1).max(100).default(20),
-  status: z.string().optional(),
-  questId: z.string().optional(),
-  search: z.string().optional(),
-  dateFrom: z.string().optional(),
-  dateTo: z.string().optional(),
-});

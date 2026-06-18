@@ -36,8 +36,8 @@ export const config = {
     token: process.env.TELEGRAM_BOT_TOKEN || '',
     chatId: process.env.TELEGRAM_CHAT_ID || '',
   },
-  booking: {
-    advanceMonths: 2,
+  externalApi: {
+    baseUrl: process.env.EXTERNAL_API_URL || 'https://calendar.questroom.ua/api-out',
   },
 };
 

@@ -4,6 +4,8 @@ import { createBooking, getBookingByTicket } from '../services/booking.service.j
 import { sendBookingConfirmation } from '../services/email.service.js';
 import { sendNewBookingNotification } from '../services/telegram.service.js';
 import { canSendEmail } from '../services/emailRateLimit.js';
+import { getRoomId, externalBookingHour, externalCalculatePrice, ExternalApiError } from '../services/external-api.service.js';
+import { prisma } from '../utils/prisma.js';
 
 export async function bookingRoutes(app: FastifyInstance) {
   app.post('/api/bookings', async (request, reply) => {
@@ -18,10 +20,53 @@ export async function bookingRoutes(app: FastifyInstance) {
       });
     }
 
-    try {
-      const booking = await createBooking(parsed.data);
+    const input = parsed.data;
 
-      // Rate-limit confirmation emails per recipient to prevent abuse (VULN-09)
+    try {
+      let externalPrice: number | null = null;
+      let roomId: number | null = null;
+
+      if (input.questId) {
+        const quest = await prisma.quest.findUnique({ where: { id: input.questId } });
+        if (!quest) {
+          return reply.status(404).send({
+            success: false,
+            error: { code: 'NOT_FOUND', message: 'Квест не знайдено' },
+          });
+        }
+
+        roomId = getRoomId(quest.slug);
+
+        const priceResult = await externalCalculatePrice({
+          roomId,
+          date: input.date,
+          time: input.time,
+          nClient: input.players,
+        });
+        externalPrice = priceResult.price;
+      }
+
+      const booking = await createBooking(input, externalPrice);
+
+      if (roomId && booking.time) {
+        try {
+          const extResult = await externalBookingHour({
+            roomId,
+            date: input.date,
+            time: input.time,
+            name: `${input.firstName} ${input.lastName}`,
+            email: input.email || undefined,
+            phone: input.phone.replace(/[\s\(\)\-]/g, ''),
+            nClient: input.players,
+            price: booking.price,
+            message: input.comment || undefined,
+          });
+          console.log(`External booking created: bookId=${extResult.bookId}, code=${extResult.code}`);
+        } catch (extErr) {
+          console.error('External booking failed (booking saved locally):', extErr);
+        }
+      }
+
       if (booking.email && canSendEmail(booking.email)) {
         sendBookingConfirmation(booking).catch(err => console.error('Email err:', err));
       }
@@ -29,16 +74,23 @@ export async function bookingRoutes(app: FastifyInstance) {
 
       return reply.status(201).send({ success: true, data: booking });
     } catch (err: any) {
+      if (err instanceof ExternalApiError) {
+        if (err.code === 'SLOT_BUSY' || err.code === 'TIME_BLOCKED') {
+          return reply.status(409).send({
+            success: false,
+            error: { code: 'SLOT_TAKEN', message: 'Цей час уже зайнято' },
+          });
+        }
+        return reply.status(502).send({
+          success: false,
+          error: { code: err.code, message: 'Сервіс бронювання тимчасово недоступний' },
+        });
+      }
+
       if (err.message === 'SLOT_TAKEN') {
         return reply.status(409).send({
           success: false,
           error: { code: 'SLOT_TAKEN', message: 'Цей час уже зайнято' },
-        });
-      }
-      if (err.message === 'SLOT_BLOCKED') {
-        return reply.status(409).send({
-          success: false,
-          error: { code: 'SLOT_BLOCKED', message: 'Цей час заблоковано' },
         });
       }
       if (err.message?.startsWith('PLAYER_LIMIT:')) {
