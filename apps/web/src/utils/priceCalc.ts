@@ -5,7 +5,7 @@ export function calcQuestPrice(params: {
   withActor?: boolean;
 }): number {
   const BASE = 2500;
-  const EXTRA_PLAYER = 350;
+  const EXTRA_PLAYER = 400;
   const ACTOR_FEE = 500;
   const EVENING_FEE = 500;
 
