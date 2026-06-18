@@ -90,6 +90,15 @@ export async function getDaysSchedule(roomId: number): Promise<ExternalDaysRespo
   return callExternalApi<ExternalDaysResponse>('room:showDays', { id: roomId });
 }
 
+export type ExternalHourResponse = Record<string, Record<string, ExternalSlot>>;
+
+export async function getHourSlot(roomId: number, date: string, time: string): Promise<ExternalSlot | null> {
+  const res = await callExternalApi<ExternalHourResponse>('room:showHour', { id: roomId, date, time });
+  const daySlots = res[date];
+  if (!daySlots) return null;
+  return daySlots[time] || null;
+}
+
 export interface BookingHourParams {
   roomId: number;
   date: string;
@@ -141,13 +150,13 @@ export async function externalCalculatePrice(params: {
   date: string;
   time: string;
   nClient: number;
-  price?: number;
+  price: number;
 }): Promise<CalculatePriceResponse> {
   return callExternalApi<CalculatePriceResponse>('room:calculatePrice', {
     id: params.roomId,
     date: params.date,
     time: params.time,
     nClient: params.nClient,
-    ...(params.price ? { price: params.price } : {}),
+    price: params.price,
   });
 }

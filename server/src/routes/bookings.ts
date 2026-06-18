@@ -4,7 +4,7 @@ import { createBooking, getBookingByTicket } from '../services/booking.service.j
 import { sendBookingConfirmation } from '../services/email.service.js';
 import { sendNewBookingNotification } from '../services/telegram.service.js';
 import { canSendEmail } from '../services/emailRateLimit.js';
-import { getRoomId, externalBookingHour, externalCalculatePrice, ExternalApiError } from '../services/external-api.service.js';
+import { getRoomId, externalBookingHour, externalCalculatePrice, getHourSlot, ExternalApiError } from '../services/external-api.service.js';
 import { prisma } from '../utils/prisma.js';
 
 function now(): string {
@@ -48,15 +48,25 @@ export async function bookingRoutes(app: FastifyInstance) {
         roomId = getRoomId(quest.slug);
         console.log(`[BOOKING] ${now()} Quest found slug=${quest.slug} roomId=${roomId}`);
 
-        console.log(`[BOOKING] ${now()} Calling calculatePrice roomId=${roomId} date=${input.date} time=${input.time} players=${input.players}`);
-        const priceResult = await externalCalculatePrice({
-          roomId,
-          date: input.date,
-          time: input.time,
-          nClient: input.players,
-        });
-        externalPrice = priceResult.price;
-        console.log(`[BOOKING] ${now()} calculatePrice result price=${externalPrice} sale=${priceResult.sale}`);
+        console.log(`[BOOKING] ${now()} Getting base price for slot date=${input.date} time=${input.time}`);
+        const slotInfo = await getHourSlot(roomId, input.date, input.time);
+        const basePrice = slotInfo?.price;
+        console.log(`[BOOKING] ${now()} Slot base price=${basePrice}`);
+
+        if (basePrice != null) {
+          console.log(`[BOOKING] ${now()} Calling calculatePrice roomId=${roomId} date=${input.date} time=${input.time} players=${input.players} basePrice=${basePrice}`);
+          const priceResult = await externalCalculatePrice({
+            roomId,
+            date: input.date,
+            time: input.time,
+            nClient: input.players,
+            price: basePrice,
+          });
+          externalPrice = priceResult.price;
+          console.log(`[BOOKING] ${now()} calculatePrice result price=${externalPrice} sale=${priceResult.sale}`);
+        } else {
+          console.log(`[BOOKING] ${now()} No base price from external API, will use local calculation`);
+        }
       }
 
       console.log(`[BOOKING] ${now()} Creating booking in local DB with price=${externalPrice}...`);
