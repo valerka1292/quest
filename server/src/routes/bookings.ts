@@ -7,10 +7,17 @@ import { canSendEmail } from '../services/emailRateLimit.js';
 import { getRoomId, externalBookingHour, externalCalculatePrice, ExternalApiError } from '../services/external-api.service.js';
 import { prisma } from '../utils/prisma.js';
 
+function now(): string {
+  return new Date().toISOString();
+}
+
 export async function bookingRoutes(app: FastifyInstance) {
   app.post('/api/bookings', async (request, reply) => {
+    console.log(`[BOOKING] ${now()} POST /api/bookings body=${JSON.stringify(request.body)}`);
+
     const parsed = bookingSchema.safeParse(request.body);
     if (!parsed.success) {
+      console.warn(`[BOOKING] ${now()} VALIDATION_ERROR ${parsed.error.errors.map(e => e.message).join(', ')}`);
       return reply.status(400).send({
         success: false,
         error: {
@@ -21,14 +28,17 @@ export async function bookingRoutes(app: FastifyInstance) {
     }
 
     const input = parsed.data;
+    console.log(`[BOOKING] ${now()} INPUT validated questId=${input.questId} date=${input.date} time=${input.time} players=${input.players}`);
 
     try {
       let externalPrice: number | null = null;
       let roomId: number | null = null;
 
       if (input.questId) {
+        console.log(`[BOOKING] ${now()} Loading quest ${input.questId}...`);
         const quest = await prisma.quest.findUnique({ where: { id: input.questId } });
         if (!quest) {
+          console.warn(`[BOOKING] ${now()} QUEST_NOT_FOUND ${input.questId}`);
           return reply.status(404).send({
             success: false,
             error: { code: 'NOT_FOUND', message: 'Квест не знайдено' },
@@ -36,7 +46,9 @@ export async function bookingRoutes(app: FastifyInstance) {
         }
 
         roomId = getRoomId(quest.slug);
+        console.log(`[BOOKING] ${now()} Quest found slug=${quest.slug} roomId=${roomId}`);
 
+        console.log(`[BOOKING] ${now()} Calling calculatePrice roomId=${roomId} date=${input.date} time=${input.time} players=${input.players}`);
         const priceResult = await externalCalculatePrice({
           roomId,
           date: input.date,
@@ -44,11 +56,16 @@ export async function bookingRoutes(app: FastifyInstance) {
           nClient: input.players,
         });
         externalPrice = priceResult.price;
+        console.log(`[BOOKING] ${now()} calculatePrice result price=${externalPrice} sale=${priceResult.sale}`);
       }
 
+      console.log(`[BOOKING] ${now()} Creating booking in local DB with price=${externalPrice}...`);
       const booking = await createBooking(input, externalPrice);
+      console.log(`[BOOKING] ${now()} Local booking created id=${booking.id} ticket=${booking.ticketNumber} price=${booking.price}`);
 
       if (roomId && booking.time) {
+        const phone = input.phone.replace(/[\s\(\)\-]/g, '');
+        console.log(`[BOOKING] ${now()} Calling externalBookingHour roomId=${roomId} date=${input.date} time=${input.time} players=${input.players} price=${booking.price} phone=${phone}`);
         try {
           const extResult = await externalBookingHour({
             roomId,
@@ -56,24 +73,31 @@ export async function bookingRoutes(app: FastifyInstance) {
             time: input.time,
             name: `${input.firstName} ${input.lastName}`,
             email: input.email || undefined,
-            phone: input.phone.replace(/[\s\(\)\-]/g, ''),
+            phone,
             nClient: input.players,
             price: booking.price,
             message: input.comment || undefined,
           });
-          console.log(`External booking created: bookId=${extResult.bookId}, code=${extResult.code}`);
-        } catch (extErr) {
-          console.error('External booking failed (booking saved locally):', extErr);
+          console.log(`[BOOKING] ${now()} External booking SUCCESS bookId=${extResult.bookId} code=${extResult.code}`);
+        } catch (extErr: any) {
+          console.error(`[BOOKING] ${now()} External booking FAILED: ${extErr?.message || extErr}`, extErr);
         }
+      } else {
+        console.log(`[BOOKING] ${now()} Skipping external booking roomId=${roomId} bookingTime=${booking.time}`);
       }
 
       if (booking.email && canSendEmail(booking.email)) {
-        sendBookingConfirmation(booking).catch(err => console.error('Email err:', err));
+        console.log(`[BOOKING] ${now()} Sending email to ${booking.email}`);
+        sendBookingConfirmation(booking).catch(err => console.error(`[BOOKING] ${now()} Email err:`, err));
       }
-      sendNewBookingNotification(booking).catch(err => console.error('TG err:', err));
+      console.log(`[BOOKING] ${now()} Sending TG notification`);
+      sendNewBookingNotification(booking).catch(err => console.error(`[BOOKING] ${now()} TG err:`, err));
 
+      console.log(`[BOOKING] ${now()} SUCCESS returning 201`);
       return reply.status(201).send({ success: true, data: booking });
     } catch (err: any) {
+      console.error(`[BOOKING] ${now()} ERROR: ${err.message} stack=${err.stack}`);
+
       if (err instanceof ExternalApiError) {
         if (err.code === 'SLOT_BUSY' || err.code === 'TIME_BLOCKED') {
           return reply.status(409).send({

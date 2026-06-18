@@ -21,10 +21,6 @@ export function getRoomId(questSlug: string): number {
   return id;
 }
 
-export function getQuestId(roomId: number): string | null {
-  return Object.entries(ROOM_IDS).find(([, v]) => v === roomId)?.[0] ?? null;
-}
-
 type ExternalMethod =
   | 'room:showDays'
   | 'room:showHour'
@@ -32,14 +28,20 @@ type ExternalMethod =
   | 'room:calculatePrice'
   | 'room:getSales';
 
+function now(): string {
+  return new Date().toISOString();
+}
+
 async function callExternalApi<T>(
   method: ExternalMethod,
   params: Record<string, unknown>
 ): Promise<T> {
-  const url = new URL(config.externalApi.baseUrl);
+  const url = config.externalApi.baseUrl;
   const body = new URLSearchParams({ task: method, ...Object.fromEntries(
     Object.entries(params).map(([k, v]) => [k, String(v)])
   )});
+
+  console.log(`[EXT-API] ${now()} REQ ${method} params=${JSON.stringify(params)}`);
 
   let response: Response;
   try {
@@ -50,23 +52,28 @@ async function callExternalApi<T>(
       signal: AbortSignal.timeout(10000),
     });
   } catch (err: any) {
-    throw new ExternalApiError('NETWORK_ERROR', `Зовнішній API недоступний: ${err.message}`);
+    const msg = `Зовнішній API недоступний: ${err.message}`;
+    console.error(`[EXT-API] ${now()} ERR ${method} — ${msg}`);
+    throw new ExternalApiError('NETWORK_ERROR', msg);
   }
 
   let json: any;
   try {
     json = await response.json();
   } catch {
-    throw new ExternalApiError('PARSE_ERROR', 'Невірний формат відповіді від зовнішнього API');
+    const msg = 'Невірний формат відповіді від зовнішнього API';
+    console.error(`[EXT-API] ${now()} PARSE_ERR ${method} — status=${response.status}, body=${await response.text().catch(() => 'unknown')}`);
+    throw new ExternalApiError('PARSE_ERROR', msg);
   }
 
   if (json?.error === 1) {
-    throw new ExternalApiError(
-      String(json.error_code || 'EXTERNAL_ERROR'),
-      json.error_message || 'Помилка зовнішнього API'
-    );
+    const code = String(json.error_code || 'EXTERNAL_ERROR');
+    const msg = json.error_message || 'Помилка зовнішнього API';
+    console.error(`[EXT-API] ${now()} ERR ${method} — code=${code} msg=${msg}`);
+    throw new ExternalApiError(code, msg);
   }
 
+  console.log(`[EXT-API] ${now()} OK ${method} — response=${JSON.stringify(json).slice(0, 200)}`);
   return json as T;
 }
 
