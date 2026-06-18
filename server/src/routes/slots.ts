@@ -3,11 +3,6 @@ import { prisma } from '../utils/prisma.js';
 import { getRoomId, getDaysSchedule, ExternalApiError } from '../services/external-api.service.js';
 import type { TimeSlot, DayStatus } from '@veilworlds/shared';
 
-const QUEST_TIME_MAP: Record<string, string[]> = {
-  'silent-hill': ['10:30', '12:00', '13:30', '15:00', '16:30', '18:00', '19:30', '21:00'],
-  'harry-potter': ['10:45', '12:15', '13:45', '15:15', '16:45', '18:15', '19:45', '21:15'],
-};
-
 export async function slotRoutes(app: FastifyInstance) {
   app.get('/api/slots/:questId', async (request, reply) => {
     const { questId } = request.params as { questId: string };
@@ -31,17 +26,13 @@ export async function slotRoutes(app: FastifyInstance) {
     try {
       const roomId = getRoomId(quest.slug);
       const schedule = await getDaysSchedule(roomId);
-      const daySlots = schedule[date];
-      const times = QUEST_TIME_MAP[quest.slug] || [];
+      const daySlots = schedule[date] || {};
 
-      const slots: TimeSlot[] = times.map(time => {
-        const ext = daySlots?.[time];
-        return {
-          time,
-          price: ext?.price ?? quest.slug === 'silent-hill' ? 2500 : 2500,
-          available: ext ? ext.free : false,
-        };
-      });
+      const slots: TimeSlot[] = Object.entries(daySlots).map(([time, slot]) => ({
+        time,
+        price: slot.price,
+        available: slot.free,
+      }));
 
       return reply.send({ success: true, data: slots });
     } catch (err) {
@@ -77,8 +68,6 @@ export async function slotRoutes(app: FastifyInstance) {
     try {
       const roomId = getRoomId(quest.slug);
       const schedule = await getDaysSchedule(roomId);
-      const times = QUEST_TIME_MAP[quest.slug] || [];
-      const totalSlots = times.length;
 
       const [y, m] = month.split('-').map(Number);
       const daysInMonth = new Date(y, m, 0).getDate();
@@ -94,7 +83,10 @@ export async function slotRoutes(app: FastifyInstance) {
           continue;
         }
 
-        const freeCount = Object.values(daySlots).filter(s => s.free).length;
+        const entries = Object.values(daySlots);
+        const totalSlots = entries.length;
+        const freeCount = entries.filter(s => s.free).length;
+
         if (freeCount === 0) {
           status[dateStr] = 'full';
         } else if (freeCount < totalSlots) {
