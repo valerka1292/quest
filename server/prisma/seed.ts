@@ -69,6 +69,10 @@ async function main() {
     where: { slug: 'harry-potter' },
     update: {
       heroImage: '/images/harry.png',
+      ageMin: 8,
+      duration: 60,
+      minPlayers: 2,
+      maxPlayers: 6,
       photos: [
         '/images/harry-potter/1.jpg',
         '/images/harry-potter/2.jpg',
