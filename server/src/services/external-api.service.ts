@@ -66,7 +66,7 @@ async function callExternalApi<T>(
     throw new ExternalApiError('PARSE_ERROR', msg);
   }
 
-  if (json?.error === 1) {
+  if (json?.error == 1 || json?.error === '1') {
     const code = String(json.error_code || 'EXTERNAL_ERROR');
     const msg = json.error_message || 'Помилка зовнішнього API';
     console.error(`[EXT-API] ${now()} ERR ${method} — code=${code} msg=${msg}`);

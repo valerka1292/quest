@@ -74,7 +74,7 @@ export async function bookingRoutes(app: FastifyInstance) {
       console.log(`[BOOKING] ${now()} Local booking created id=${booking.id} ticket=${booking.ticketNumber} price=${booking.price}`);
 
       if (roomId && booking.time) {
-        const phone = input.phone.replace(/[\s\(\)\-]/g, '');
+        const phone = input.phone.replace(/\D/g, '');
         console.log(`[BOOKING] ${now()} Calling externalBookingHour roomId=${roomId} date=${input.date} time=${input.time} players=${input.players} price=${booking.price} phone=${phone}`);
         try {
           const extResult = await externalBookingHour({
