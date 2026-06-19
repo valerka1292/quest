@@ -15,6 +15,7 @@ export class BookingOverlay extends HTMLElement {
   private selectedTime = '';
   private players = 4;
   private price = 2500;
+  private externalBookingSuccess = false;
 
   connectedCallback() {
     this.className = 'hidden fixed inset-0 z-[100]';
@@ -105,9 +106,10 @@ export class BookingOverlay extends HTMLElement {
         packageSlug: this.packageSlug,
         date: this.selectedDate,
         time: this.selectedTime,
-        onSubmit: (players, price) => {
+        onSubmit: (players, price, booking) => {
           this.players = players;
           this.price = price;
+          this.externalBookingSuccess = booking?.externalBookingSuccess ?? false;
           this.step = 3;
           trackEvent('booking_step2_complete');
           this.renderContent();
@@ -125,6 +127,7 @@ export class BookingOverlay extends HTMLElement {
         time: this.selectedTime,
         players: this.players,
         price: this.price,
+        externalBookingSuccess: this.externalBookingSuccess,
         onDone: () => this.close(),
       });
       contentEl.appendChild(confirm);

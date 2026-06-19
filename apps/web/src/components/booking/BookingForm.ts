@@ -12,7 +12,7 @@ interface BookingFormProps {
   packageSlug: string | null;
   date: string;
   time: string;
-  onSubmit: (players: number, price: number) => void;
+  onSubmit: (players: number, price: number, booking?: any) => void;
 }
 
 export class BookingForm extends HTMLElement {
@@ -271,9 +271,9 @@ export class BookingForm extends HTMLElement {
       try {
         submit.disabled = true;
         submit.textContent = 'Бронюємо...';
-        await createBooking(data);
+        const booking = await createBooking(data);
         trackEvent('booking_complete');
-        this.props.onSubmit(this.players, this.price);
+        this.props.onSubmit(this.players, this.price, booking);
       } catch (err: any) {
         errEl.classList.remove('hidden');
         errEl.textContent = err.message || 'Помилка бронювання';

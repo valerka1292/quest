@@ -73,6 +73,7 @@ export async function bookingRoutes(app: FastifyInstance) {
       const booking = await createBooking(input, externalPrice);
       console.log(`[BOOKING] ${now()} Local booking created id=${booking.id} ticket=${booking.ticketNumber} price=${booking.price}`);
 
+      let externalBookingSuccess = false;
       if (roomId && booking.time) {
         const phone = input.phone.replace(/\D/g, '');
         console.log(`[BOOKING] ${now()} Calling externalBookingHour roomId=${roomId} date=${input.date} time=${input.time} players=${input.players} price=${booking.price} phone=${phone}`);
@@ -88,11 +89,14 @@ export async function bookingRoutes(app: FastifyInstance) {
             price: booking.price,
             message: input.comment || undefined,
           });
+          externalBookingSuccess = true;
           console.log(`[BOOKING] ${now()} External booking SUCCESS bookId=${extResult.bookId} code=${extResult.code}`);
         } catch (extErr: any) {
           console.error(`[BOOKING] ${now()} External booking FAILED: ${extErr?.message || extErr}`, extErr);
         }
-      } else {
+      }
+
+      const responseData = { ...booking, externalBookingSuccess }; else {
         console.log(`[BOOKING] ${now()} Skipping external booking roomId=${roomId} bookingTime=${booking.time}`);
       }
 
@@ -103,8 +107,8 @@ export async function bookingRoutes(app: FastifyInstance) {
       console.log(`[BOOKING] ${now()} Sending TG notification`);
       sendNewBookingNotification(booking).catch(err => console.error(`[BOOKING] ${now()} TG err:`, err));
 
-      console.log(`[BOOKING] ${now()} SUCCESS returning 201`);
-      return reply.status(201).send({ success: true, data: booking });
+      console.log(`[BOOKING] ${now()} SUCCESS returning 201 externalBookingSuccess=${externalBookingSuccess}`);
+      return reply.status(201).send({ success: true, data: responseData });
     } catch (err: any) {
       console.error(`[BOOKING] ${now()} ERROR: ${err.message} stack=${err.stack}`);
 

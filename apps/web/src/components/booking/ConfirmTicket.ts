@@ -8,6 +8,7 @@ interface ConfirmTicketProps {
   time: string;
   players: number;
   price: number;
+  externalBookingSuccess?: boolean;
   onDone: () => void;
 }
 
@@ -21,6 +22,10 @@ export class ConfirmTicket extends HTMLElement {
 
   connectedCallback() {
     this.className = 'flex flex-col items-center gap-6 py-6 text-center select-none';
+
+    if (this.props.externalBookingSuccess && typeof gtag_report_conversion === 'function') {
+      gtag_report_conversion();
+    }
 
     const check = div({ class: 'w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center' });
     check.innerHTML = '<i class="ph ph-check text-2xl text-green-400"></i>';
