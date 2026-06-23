@@ -94,12 +94,11 @@ export async function bookingRoutes(app: FastifyInstance) {
         } catch (extErr: any) {
           console.error(`[BOOKING] ${now()} External booking FAILED: ${extErr?.message || extErr}`, extErr);
         }
-      }
-
-      const responseData = { ...booking, externalBookingSuccess }; else {
+      } else {
         console.log(`[BOOKING] ${now()} Skipping external booking roomId=${roomId} bookingTime=${booking.time}`);
       }
 
+      const responseData = { ...booking, externalBookingSuccess };
       if (booking.email && canSendEmail(booking.email)) {
         console.log(`[BOOKING] ${now()} Sending email to ${booking.email}`);
         sendBookingConfirmation(booking).catch(err => console.error(`[BOOKING] ${now()} Email err:`, err));
