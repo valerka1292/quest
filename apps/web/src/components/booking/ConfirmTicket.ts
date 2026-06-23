@@ -23,7 +23,7 @@ export class ConfirmTicket extends HTMLElement {
   connectedCallback() {
     this.className = 'flex flex-col items-center gap-6 py-6 text-center select-none';
 
-    if (this.props.externalBookingSuccess && typeof gtag_report_conversion === 'function') {
+    if (typeof gtag_report_conversion === 'function') {
       gtag_report_conversion();
     }
 
