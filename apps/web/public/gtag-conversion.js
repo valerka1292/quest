@@ -8,7 +8,7 @@ function gtag_report_conversion(url) {
   try {
     if (typeof window.gtag === 'function') {
       window.gtag('event', 'conversion', {
-          'send_to': 'AW-18253190023/LJKmCOWm98EcEIen5v9D',
+          'send_to': 'AW-18253190023/JY8tCL2T98McEIen5v9D',
           'value': 1.0,
           'currency': 'UAH',
           'event_callback': callback
@@ -16,7 +16,7 @@ function gtag_report_conversion(url) {
     } else if (window.dataLayer) {
       window.dataLayer.push({
         event: 'conversion',
-        send_to: 'AW-18253190023/LJKmCOWm98EcEIen5v9D',
+        send_to: 'AW-18253190023/JY8tCL2T98McEIen5v9D',
         value: 1.0,
         currency: 'UAH',
         event_callback: callback
