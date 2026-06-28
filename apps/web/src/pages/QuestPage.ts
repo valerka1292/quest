@@ -57,12 +57,15 @@ export class QuestPage extends HTMLElement {
 
     const info = new QuestInfo(this.quest);
     info.setAttribute('data-animate', 'slide-up');
+    info.id = 'contacts';
 
     const gallery = new PhotoGallery(this.quest.photos);
     gallery.setAttribute('data-animate', 'fade-in');
+    gallery.id = 'gallery';
 
     const reviewList = new ReviewList(this.slug);
     reviewList.setAttribute('data-animate', 'slide-up');
+    reviewList.id = 'reviews';
 
     const reviewForm = new ReviewForm(this.slug);
     reviewForm.setAttribute('data-animate', 'fade-in');
