@@ -39,6 +39,8 @@ export class QuestHero extends HTMLElement {
         <span class="flex items-center gap-2 bg-white/[0.03] backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-xl"><i class="ph ph-users text-text-muted"></i> <span class="text-white font-bold">${this.quest.minPlayers}-${this.quest.maxPlayers}</span> гравців</span>
         <span class="flex items-center gap-2 bg-white/[0.03] backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-xl"><i class="ph ph-clock text-text-muted"></i> <span class="text-white font-bold">${this.quest.duration}</span> хв</span>
         ${this.quest.hasActor ? `<span class="flex items-center gap-2 bg-accent-red/10 border border-accent-red/20 px-3 py-1.5 rounded-xl text-accent-red"><i class="ph ph-mask-happy text-base"></i> Актор</span>` : ''}
+        <span class="flex items-center gap-2 bg-white/[0.03] backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-xl"><i class="ph ph-map-pin text-text-muted"></i> <span class="text-white font-bold">вул. Короленко, 14</span></span>
+        <span class="flex items-center gap-2 bg-white/[0.03] backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-xl"><i class="ph ph-coin text-text-muted"></i> <span class="text-white font-bold">Від 2 500 грн</span></span>
       </div>
       <button class="book-quest-btn inline-flex items-center gap-2 ${btnBg} ${glowClass} text-white font-semibold px-8 py-4 rounded-xl active:scale-95 hover:scale-[1.02] transition-all duration-300 self-start shadow-xl shadow-black/50">
         <i class="ph ph-calendar-plus text-lg"></i> Забронювати

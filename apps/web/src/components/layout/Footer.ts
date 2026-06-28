@@ -22,7 +22,7 @@ export class Footer extends HTMLElement {
           <div class="space-y-2 text-sm text-text-muted">
             <a href="https://maps.app.goo.gl/u5u4hQ2pi6rCc7mg6?g_st=atm" target="_blank" rel="noopener noreferrer" class="block hover:text-white transition-colors">м. Дніпро, вул. Короленко, 14</a>
             <a href="tel:+380999773349" class="block hover:text-white transition-colors">+380 (99) 977-33-49</a>
-            <p>hello@veilworlds.com</p>
+            <p>irinatishyk@gmail.com</p>
           </div>
         </div>
       </div>
