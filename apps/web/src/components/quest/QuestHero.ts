@@ -42,14 +42,6 @@ export class QuestHero extends HTMLElement {
         <span class="flex items-center gap-2 bg-white/[0.03] backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-xl"><i class="ph ph-map-pin text-text-muted"></i> <span class="text-white font-bold">вул. Короленко, 14</span></span>
         <span class="flex items-center gap-2 bg-white/[0.03] backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-xl"><i class="ph ph-coin text-text-muted"></i> <span class="text-white font-bold">Від 2 500 грн</span></span>
       </div>
-      ${isSH ? `
-      <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm font-mono mb-6">
-        <a href="#gallery" class="text-text-muted hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/60"><i class="ph ph-image text-base mr-1.5"></i>Фото</a>
-        <a href="#gallery" class="text-text-muted hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/60"><i class="ph ph-stack text-base mr-1.5"></i>Галерея</a>
-        <a href="#reviews" class="text-text-muted hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/60"><i class="ph ph-star text-base mr-1.5"></i>Відгуки</a>
-        <a href="#contacts" class="text-text-muted hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/60"><i class="ph ph-map-pin text-base mr-1.5"></i>Контакти</a>
-      </div>
-      ` : ''}
       <button class="book-quest-btn inline-flex items-center gap-2 ${btnBg} ${glowClass} text-white font-semibold px-8 py-4 rounded-xl active:scale-95 hover:scale-[1.02] transition-all duration-300 self-start shadow-xl shadow-black/50">
         <i class="ph ph-calendar-plus text-lg"></i> Забронювати
       </button>

@@ -73,6 +73,16 @@ export class QuestPage extends HTMLElement {
     const fragment = document.createDocumentFragment();
     fragment.append(hero, info, gallery, reviewList, reviewForm);
     this.insertBefore(fragment, footer);
+
+    const hash = window.location.hash;
+    if (hash) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const el = document.getElementById(hash.slice(1));
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        });
+      });
+    }
   }
 }
 
